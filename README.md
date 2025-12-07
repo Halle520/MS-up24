@@ -2,95 +2,199 @@
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+✨ Your Monospace Nx workspace with NestJS backend and Next.js frontend ✨.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## 🚀 Quick Start
 
-## Run tasks
+### Prerequisites
+- Node.js 20 (use `nvm use 20` if you have nvm)
+- Bun installed (`curl -fsSL https://bun.sh/install | bash`)
 
-To run tasks with Nx use:
+### Starting the Project
 
-```sh
-npx nx <target> <project-name>
+#### Option 1: Start Both Services Together (Recommended)
+```bash
+# Using npm scripts (easiest)
+bun run start:all
+
+# Or using Nx directly
+bunx nx run-many --targets=serve,dev --projects=backend,frontend --parallel
 ```
 
-For example:
+#### Option 2: Start Services Separately
 
-```sh
-npx nx build myproject
+**Terminal 1 - Backend:**
+```bash
+# Using npm script
+bun run start:backend
+
+# Or using Nx directly
+bunx nx serve backend
+```
+Backend will run on: `http://localhost:3000`
+API endpoint: `http://localhost:3000/api/greeting`
+
+**Terminal 2 - Frontend:**
+```bash
+# Using npm script
+bun run start:frontend
+
+# Or using Nx directly
+bunx nx dev frontend
+```
+Frontend will run on: `http://localhost:3000` (Next.js default port, or check terminal output)
+
+### Verify It's Working
+
+1. Open your browser and navigate to `http://localhost:3000` (or the port shown in the frontend terminal)
+2. You should see the frontend page displaying a greeting message fetched from the backend API
+3. The greeting API endpoint is available at: `http://localhost:3000/api/greeting`
+
+**Note:** Both backend and frontend may try to use port 3000. If there's a conflict:
+- Backend will use port 3000 (or PORT env variable)
+- Frontend (Next.js) will automatically use the next available port (usually 3001)
+- Check the terminal output to see which port each service is using
+
+## 📁 Project Structure
+
+```
+monospace/
+├── apps/
+│   ├── backend/          # NestJS backend application
+│   │   └── src/
+│   │       ├── app/
+│   │       │   ├── app.controller.ts
+│   │       │   ├── app.service.ts
+│   │       │   └── app.module.ts
+│   │       └── main.ts
+│   └── frontend/         # Next.js frontend application
+│       └── src/
+│           └── app/
+│               ├── page.tsx
+│               └── layout.tsx
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🛠️ Available Commands
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Build
+```bash
+# Build backend
+bunx nx build backend
 
-## Add new projects
+# Build frontend
+bunx nx build frontend
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+# Build both
+bunx nx run-many --target=build --projects=backend,frontend
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
+### Test
+```bash
+# Test backend
+bunx nx test backend
 
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
-
-# Generate a library
-npx nx g @nx/react:lib some-lib
+# Test frontend
+bunx nx test frontend
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+### Lint
+```bash
+# Lint backend
+bunx nx lint backend
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
+# Lint frontend
+bunx nx lint frontend
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+## 🔧 Technology Stack
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Backend
+- **NestJS** - Progressive Node.js framework
+- **MikroORM** - TypeScript ORM for PostgreSQL
+- **Supabase** - Backend as a Service
+- **Auth0** - Authentication
+- **PostgreSQL** - Database
+- **Passport** - Authentication middleware
 
-### Step 2
+### Frontend
+- **Next.js 14** - React framework
+- **React 18** - UI library
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - UI components
+- **Vite** - Build tool
 
-Use the following command to configure a CI workflow for your workspace:
+## 📝 API Endpoints
 
-```sh
-npx nx g ci-workflow
+### Backend API (Base URL: `http://localhost:3000/api`)
+
+- `GET /api/greeting` - Returns a greeting message
+  ```json
+  {
+    "message": "Hello from Monospace Backend! 👋"
+  }
+  ```
+
+## 🌐 Environment Variables
+
+Environment files have been created for both projects. Copy the `.env.example` files and update with your actual values:
+
+### Backend (`apps/backend/.env`)
+
+Essential variables:
+- `PORT` - Server port (default: 3000)
+- `FRONTEND_URL` - Frontend URL for CORS (default: http://localhost:3000)
+- `DATABASE_URL` - PostgreSQL connection string
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_ANON_KEY` - Supabase anonymous key
+- `AUTH0_DOMAIN` - Your Auth0 domain
+- `AUTH0_CLIENT_ID` - Auth0 client ID
+- `AUTH0_CLIENT_SECRET` - Auth0 client secret
+- `JWT_SECRET` - Secret key for JWT tokens
+
+**Setup:**
+```bash
+# Copy the example file
+cp apps/backend/.env.example apps/backend/.env
+
+# Edit with your actual values
+# (The .env file is already created with default development values)
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Frontend (`apps/frontend/.env.local`)
 
-## Install Nx Console
+Essential variables (all must be prefixed with `NEXT_PUBLIC_` to be accessible in the browser):
+- `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://localhost:3000/api)
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `NEXT_PUBLIC_AUTH0_DOMAIN` - Auth0 domain
+- `NEXT_PUBLIC_AUTH0_CLIENT_ID` - Auth0 client ID
+- `NEXT_PUBLIC_APP_URL` - Frontend application URL
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+**Setup:**
+```bash
+# Copy the example file
+cp apps/frontend/.env.example apps/frontend/.env.local
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Edit with your actual values
+# (The .env.local file is already created with default development values)
+```
 
-## Useful links
+**Note:** `.env` and `.env.local` files are gitignored and should never be committed to version control.
 
-Learn more:
+## 📚 Learn More
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Nx Documentation](https://nx.dev)
+- [NestJS Documentation](https://docs.nestjs.com)
+- [Next.js Documentation](https://nextjs.org/docs)
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🎯 Next Steps
+
+1. Set up your database connection (PostgreSQL/Supabase)
+2. Configure Auth0 authentication
+3. Add more API endpoints
+4. Build out your frontend components
+5. Set up environment variables
+
+---
+
+**Note:** Make sure both services are running before testing the full-stack integration!
