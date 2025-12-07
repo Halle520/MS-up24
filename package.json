@@ -8,7 +8,9 @@
     "start:all": "nx run-many --targets=serve,dev --projects=backend,frontend --parallel",
     "build:be": "nx build backend",
     "build:fe": "nx build frontend",
-    "build:all": "nx run-many --target=build --projects=backend,frontend"
+    "build:all": "nx run-many --target=build --projects=backend,frontend",
+    "storybook": "nx storybook frontend",
+    "build:storybook": "nx build-storybook frontend"
   },
   "private": true,
   "dependencies": {
@@ -47,6 +49,8 @@
     "vite": "^5.0.0"
   },
   "devDependencies": {
+    "@locator/runtime": "^0.5.1",
+    "@locator/webpack-loader": "^0.5.1",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
     "@nx/devkit": "22.1.3",
@@ -56,11 +60,16 @@
     "@nx/node": "22.1.3",
     "@nx/playwright": "22.1.3",
     "@nx/react": "22.1.3",
+    "@nx/storybook": "22.1.3",
     "@nx/vite": "22.1.3",
     "@nx/web": "22.1.3",
     "@nx/webpack": "22.1.3",
     "@nx/workspace": "22.1.3",
     "@playwright/test": "^1.36.0",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-links": "^10.1.4",
+    "@storybook/nextjs": "10.1.4",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
@@ -73,6 +82,8 @@
     "eslint": "^8.0.0",
     "nx": "22.1.3",
     "prettier": "^2.6.2",
+    "storybook": "10.1.4",
+    "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
     "vitest": "^1.3.1",

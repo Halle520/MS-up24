@@ -122,6 +122,7 @@ bunx nx lint frontend
 - **Tailwind CSS** - Styling
 - **shadcn/ui** - UI components
 - **Vite** - Build tool
+- **LocatorJS** - Component finder tool (development only)
 
 ## 📝 API Endpoints
 
@@ -194,6 +195,96 @@ cp apps/frontend/.env.example apps/frontend/.env.local
 3. Add more API endpoints
 4. Build out your frontend components
 5. Set up environment variables
+
+## 🔍 LocatorJS
+
+LocatorJS is configured and enabled in development mode. It helps you quickly find React components in your browser.
+
+### Installation
+
+LocatorJS is configured using the [data-ids variant](https://www.locatorjs.com/install/react-data-id) which works with the browser extension:
+
+1. **Webpack Loader**: `@locator/webpack-loader` - Adds data-ids to components during build
+2. **Runtime Library**: `@locator/runtime` - Optional UI library (included for convenience)
+
+### How to Use
+
+1. **Install the Browser Extension:**
+   - [Chrome Extension](https://chrome.google.com/webstore/detail/locatorjs/npbfbmleipbkchlnhfhfhpdabebgdfji)
+   - [Firefox Extension](https://addons.mozilla.org/en-US/firefox/addon/locatorjs/)
+   - [Edge Extension](https://microsoftedge.microsoft.com/addons/detail/locatorjs/edhghaodanlmhbdpfbcbhdlbdfgojkci)
+
+2. **Usage:**
+   - Start your frontend in development mode: `bun run start:fe`
+   - Open your browser and navigate to your app
+   - Click on any component in the browser
+   - LocatorJS will highlight the component and show you its file location
+   - Click the file path to open it directly in your IDE
+
+### Configuration
+
+- **Webpack Loader**: Configured in `apps/frontend/next.config.js` to add data-ids to all React components in development mode
+- **Runtime**: Initialized through the `Locator` component in `apps/frontend/src/components/locator.tsx`
+- Only active when:
+  - `NODE_ENV === 'development'`
+  - Running in the browser (client-side only)
+  - Browser extension is installed
+
+## 📚 Storybook
+
+Storybook is configured for component development and documentation.
+
+### Starting Storybook
+
+```bash
+# Start Storybook development server
+bun run storybook
+```
+
+Storybook will be available at `http://localhost:6006` (or the port shown in terminal)
+
+### Building Storybook
+
+```bash
+# Build static Storybook for deployment
+bun run build:storybook
+```
+
+### Features
+
+- **Component Stories**: Located in `apps/frontend/src/**/*.stories.tsx`
+- **Tailwind CSS**: Fully configured and working in Storybook
+- **Addons**: Includes essential addons (controls, actions, interactions, etc.)
+- **TypeScript**: Full TypeScript support
+
+### Example Stories
+
+- `Button.stories.tsx` - Example button component with variants
+- `Locator.stories.tsx` - LocatorJS component story
+
+### Creating New Stories
+
+Create a `.stories.tsx` file next to your component:
+
+```typescript
+import type { Meta, StoryObj } from '@storybook/react';
+import { YourComponent } from './your-component';
+
+const meta: Meta<typeof YourComponent> = {
+  title: 'Components/YourComponent',
+  component: YourComponent,
+  tags: ['autodocs'],
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    // Your component props
+  },
+};
+```
 
 ---
 

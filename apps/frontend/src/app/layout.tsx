@@ -1,4 +1,5 @@
 import './global.css';
+import { Locator } from '../components/locator';
 
 export const metadata = {
   title: 'Welcome to frontend',
@@ -12,7 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Locator />
+      </body>
     </html>
   );
 }
