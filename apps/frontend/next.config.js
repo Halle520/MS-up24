@@ -12,6 +12,19 @@ const nextConfig = {
   nx: {},
   // Enable source maps for LocatorJS
   productionBrowserSourceMaps: false,
+  // Image optimization configuration for Supabase
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+    // Fallback for development - allows unoptimized images
+    unoptimized: process.env.NODE_ENV === 'development',
+  },
   // Webpack config for LocatorJS
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import NextImage from 'next/image';
 import {
   useImage,
   useUploadImage,
@@ -58,12 +59,12 @@ export default function PinterestShowPage() {
   }
 
   const imageUrl =
-    imageData.url_original ||
-    imageData.url_large ||
-    imageData.url_medium ||
-    imageData.url_tiny ||
+    imageData.urlOriginal ||
+    imageData.urlLarge ||
+    imageData.urlMedium ||
+    imageData.urlTiny ||
     '';
-  const imageTitle = imageData.original_name.split('.')[0] || 'Untitled';
+  const imageTitle = imageData.originalName.split('.')[0] || 'Untitled';
 
   const handleWidthChange = (newWidth: number) => {
     if (newWidth < 100) newWidth = 100;
@@ -111,7 +112,7 @@ export default function PinterestShowPage() {
             canvas.toBlob(
               async (blob) => {
                 if (blob) {
-                  const file = new File([blob], imageData.original_name, {
+                  const file = new File([blob], imageData.originalName, {
                     type: blob.type || 'image/jpeg',
                   });
                   try {
@@ -222,17 +223,24 @@ export default function PinterestShowPage() {
       <main className={styles.showMain}>
         <div className={styles.showContainer}>
           <div className={styles.imagePreview}>
-            <img
-              ref={imageRef}
-              src={imageUrl}
-              alt={imageTitle}
-              onLoad={handleImageLoad}
-              className={styles.previewImage}
-              style={{
-                width: `${Math.min((width / 800) * 100, 100)}%`,
-                height: 'auto',
-              }}
-            />
+            {imageUrl ? (
+              <NextImage
+                ref={imageRef}
+                src={imageUrl}
+                alt={imageTitle}
+                onLoad={handleImageLoad}
+                className={styles.previewImage}
+                width={0}
+                height={0}
+                sizes="100vw"
+                style={{
+                  width: `${Math.min((width / 800) * 100, 100)}%`,
+                  height: 'auto',
+                }}
+              />
+            ) : (
+              <div className={styles.emptyState}>No image URL available</div>
+            )}
             <div className={styles.previewInfo}>
               Original: {imageRef.current?.naturalWidth || '...'} ×{' '}
               {imageRef.current?.naturalHeight || '...'} px
@@ -244,17 +252,17 @@ export default function PinterestShowPage() {
             <h2 className={styles.editorTitle}>Edit Image</h2>
             <div className={styles.imageDetails}>
               <p>
-                <strong>Name:</strong> {imageData.original_name}
+                <strong>Name:</strong> {imageData.originalName}
               </p>
               <p>
                 <strong>Size:</strong> {(imageData.size / 1024).toFixed(2)} KB
               </p>
               <p>
-                <strong>Type:</strong> {imageData.mime_type}
+                <strong>Type:</strong> {imageData.mimeType}
               </p>
               <p>
                 <strong>Uploaded:</strong>{' '}
-                {new Date(imageData.uploaded_at).toLocaleDateString()}
+                {new Date(imageData.uploadedAt).toLocaleDateString()}
               </p>
             </div>
             <div className={styles.controlGroup}>

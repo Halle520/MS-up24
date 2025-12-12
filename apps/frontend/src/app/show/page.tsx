@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import NextImage from 'next/image';
 import {
   useImages,
   useUploadImage,
@@ -26,22 +27,28 @@ export default function PinterestPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
 
   const images: ImageCard[] =
-    imagesData?.images.map((img) => ({
-      id: img.id,
-      imageUrl:
+    imagesData?.images.map((img) => {
+      const imageUrl =
         img.urlOriginal ||
         img.urlLarge ||
         img.urlMedium ||
         img.urlTiny ||
         img.url ||
-        '',
-      title: img.originalName.split('.')[0] || 'Untitled',
-      description: `${(img.size / 1024).toFixed(2)} KB`,
-      originalName: img.originalName,
-      size: img.size,
-    })) || [];
+        '';
+
+      return {
+        id: img.id,
+        imageUrl,
+        title: img.originalName.split('.')[0] || 'Untitled',
+        description: `${(img.size / 1024).toFixed(2)} KB`,
+        originalName: img.originalName,
+        size: img.size,
+      };
+    }) || [];
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -77,6 +84,10 @@ export default function PinterestPage() {
 
   const handleImageClick = (image: ImageCard) => {
     router.push(`/pinterest/${image.id}`);
+  };
+
+  const handleImageError = (imageId: string) => {
+    setImageErrors((prev) => new Set(prev).add(imageId));
   };
 
   return (
@@ -175,12 +186,34 @@ export default function PinterestPage() {
                 onClick={() => handleImageClick(image)}
               >
                 <div className={styles.imageWrapper}>
-                  <img
-                    src={image.imageUrl}
-                    alt={image.title}
-                    className={styles.image}
-                    loading="lazy"
-                  />
+                  {imageErrors.has(image.id) || !image.imageUrl ? (
+                    <div className={styles.imagePlaceholder}>
+                      <svg
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z"
+                          fill="#999"
+                        />
+                      </svg>
+                      <p>Image unavailable</p>
+                    </div>
+                  ) : (
+                    <NextImage
+                      src={image.imageUrl}
+                      alt={image.title}
+                      className={styles.image}
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      style={{ width: '100%', height: 'auto' }}
+                      onError={() => handleImageError(image.id)}
+                    />
+                  )}
                   <div className={styles.imageOverlay}>
                     <div className={styles.imageInfo}>
                       <h3 className={styles.imageTitle}>{image.title}</h3>

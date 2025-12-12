@@ -220,32 +220,38 @@ The interactive documentation provides:
 - `PATCH /api/components/:id` - Update a component
 - `DELETE /api/components/:id` - Delete a component
 
-#### Images (Frontend Direct to Supabase)
+#### Images API (`/api/images`)
 
-Images are handled directly from the frontend using Supabase client:
+Images are handled via the backend API with Supabase storage:
 
-- **Upload**: Images are uploaded directly to Supabase Storage from the frontend
-- **Storage**: Images are stored in the `images` bucket in Supabase Storage
-- **Metadata**: Image metadata is stored in the `images` table in Supabase PostgreSQL
-- **Retrieval**: Images are fetched directly from Supabase database and storage
+- `GET /api/images` - Get all images with pagination (`?page=1&limit=20`)
+- `GET /api/images/:id` - Get an image by ID
+- `POST /api/images/upload` - Upload an image (multipart/form-data)
+- `DELETE /api/images/:id` - Delete an image
+
+**Backend Processing:**
+- **Upload**: Images are uploaded to the backend API, which processes them and stores in Supabase Storage
+- **Storage**: Images are stored in the `images` bucket in Supabase Storage with multiple resolutions (tiny, medium, large, original)
+- **Metadata**: Image metadata is stored in the `images` table in Supabase PostgreSQL via Prisma
+- **Retrieval**: Images are fetched via backend API, which returns public Supabase URLs
 - **Deletion**: Images are deleted from both storage and database
 
-**Frontend Functions** (in `apps/frontend/src/lib/supabase/images.ts`):
-
-- `uploadImage(file, userId?)` - Upload image and save metadata
-- `getImages(page, limit, userId?)` - Get all images with pagination
-- `getImageById(id)` - Get image by ID
-- `getImageByFilename(filename)` - Get image by filename
-- `deleteImage(id)` - Delete image from storage and database
-
-**React Hooks** (in `apps/frontend/src/lib/hooks/use-images.ts`):
+**Frontend Integration** (in `apps/frontend/src/lib/api/images.api.ts` and `apps/frontend/src/lib/hooks/use-images.ts`):
 
 - `useImages(page, limit, userId?)` - Query hook for image list
 - `useImage(id)` - Query hook for single image
 - `useUploadImage()` - Mutation hook for uploading images
 - `useDeleteImage()` - Mutation hook for deleting images
 
-**For detailed API documentation with examples, request/response schemas, and interactive testing, visit the [API Documentation](http://localhost:3000/api-docs) page.**
+**Next.js Image Configuration:**
+
+The frontend is configured to load images from Supabase Storage using Next.js Image component:
+- Remote patterns are configured in `next.config.js` to allow `**.supabase.co` domains
+- Images use the `fill` layout for responsive sizing
+- Error handling displays a placeholder when images fail to load
+- Unoptimized mode is enabled in development for faster loading
+
+**For detailed API documentation with examples, request/response schemas, and interactive testing, visit the [API Documentation](http://localhost:4000/api-docs) page.**
 
 ## 🌐 Environment Variables
 
