@@ -1,5 +1,6 @@
 import './global.css';
 import { Locator } from '../components/locator';
+import { AppQueryClientProvider } from '../lib/providers/query-client-provider';
 
 export const metadata = {
   title: 'Welcome to frontend',
@@ -14,8 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <Locator />
+        <AppQueryClientProvider>
+          {children}
+          <Locator />
+        </AppQueryClientProvider>
       </body>
     </html>
   );

@@ -22,6 +22,9 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
+  /* Global setup and teardown for Supabase initialization */
+  globalSetup: require.resolve('./src/support/global-setup.ts'),
+  globalTeardown: require.resolve('./src/support/global-teardown.ts'),
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'bun nx run frontend:dev',

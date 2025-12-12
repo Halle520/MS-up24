@@ -7,6 +7,6 @@ export class AppService {
   }
 
   getGreeting(): { message: string } {
-    return { message: 'Hello from Monospace Backend! 👋' };
+    return { message: 'Hello from NestJS Backend! 👋' };
   }
 }

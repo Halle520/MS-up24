@@ -22,17 +22,18 @@ const nextConfig = {
       config.module.rules.push({
         test: /\.(tsx|ts|jsx|js)$/,
         exclude: /node_modules/,
-        use: [{
-          loader: '@locator/webpack-loader',
-          options: {
-            env: 'development'
-          }
-        }]
+        use: [
+          {
+            loader: '@locator/webpack-loader',
+            options: {
+              env: 'development',
+            },
+          },
+        ],
       });
     }
     return config;
   },
-
 };
 
 const plugins = [

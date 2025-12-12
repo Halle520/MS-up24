@@ -8,6 +8,8 @@ alwaysApply: true
 
 - Always follow the monorepo structure: keep backend code in `apps/backend/` and frontend code in `apps/frontend/`. Never mix concerns between applications.
 
+- Every core type using in both backend and frontend, place in shared folder to using globally
+
 - When adding new dependencies, use `bun add` and ensure they're added to the correct workspace (use `-w` flag for workspace root, or run from the specific app directory).
 
 - Maintain consistent code style: use TypeScript for type safety, follow existing patterns for file organization, and ensure proper error handling.

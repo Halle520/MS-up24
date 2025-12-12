@@ -1,0 +1,13 @@
+{
+  "watch": ["src/**/*", ".env", ".env.*", "*.env", "*.env.*"],
+  "ext": "ts,js,json,env",
+  "ignore": ["src/**/*.spec.ts", "node_modules/**/*", "dist/**/*"],
+  "exec": "nx serve backend",
+  "restartable": "rs",
+  "delay": 500,
+  "verbose": true,
+  "legacyWatch": true,
+  "polling": 1000,
+  "signal": "SIGTERM",
+  "killTimeout": 5000
+}

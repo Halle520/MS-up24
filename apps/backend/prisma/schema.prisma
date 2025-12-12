@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Image {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  filename     String   @unique @db.VarChar(255)
+  originalName String   @map("original_name") @db.VarChar(255)
+  mimeType     String   @map("mime_type") @db.VarChar(100)
+  size         BigInt
+  width        Int?
+  height       Int?
+  urlTiny      String?  @map("url_tiny") @db.Text
+  urlMedium    String?  @map("url_medium") @db.Text
+  urlLarge     String?  @map("url_large") @db.Text
+  urlOriginal  String   @map("url_original") @db.Text
+  userId       String?  @map("user_id") @db.VarChar(255)
+  uploadedAt   DateTime @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([filename], map: "idx_images_filename")
+  @@index([userId], map: "idx_images_user_id")
+  @@index([uploadedAt(sort: Desc)], map: "idx_images_uploaded_at")
+  @@map("images")
+}
