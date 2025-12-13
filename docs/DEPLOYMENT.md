@@ -8,22 +8,22 @@ Because this project is an **Nx Monorepo**, Vercel needs specific configuration 
 
 2.  **Configure Project Settings**:
     *   **Framework Preset**: Select `Next.js`.
-    *   **Root Directory**: Click "Edit" and select `apps/frontend`. This tells Vercel your app logic is here.
+    *   **Root Directory**: **Keep at `.` (Repository Root)**.
+        *   *Why?* Vercel needs to see the root `package.json` to install dependencies (like Next.js) correctly.
 
 3.  **Override Build Settings**:
     Since Nx builds the app from the root workspace and outputs to a shared `dist` folder, you must override the default settings:
 
     *   **Build Command**:
         ```bash
-        cd ../.. && npx nx build frontend --configuration=production
+        npx nx build frontend --configuration=production
         ```
-        *Explanation: Move to repo root (`cd ../..`) and run the Nx build command.*
 
     *   **Output Directory**:
         ```bash
-        ../../dist/apps/frontend/.next
+        dist/apps/frontend/.next
         ```
-        *Explanation: Nx places build artifacts in the `dist` folder at the root. We point Vercel to look there.*
+        *Explanation: Nx places build artifacts in the `dist` folder.*
 
     *   **Install Command** (Optional, but recommended for Bun):
         ```bash
