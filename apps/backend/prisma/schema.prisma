@@ -26,8 +26,85 @@ model Image {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  user      User?    @relation(fields: [userId], references: [id])
+
   @@index([filename], map: "idx_images_filename")
   @@index([userId], map: "idx_images_user_id")
   @@index([uploadedAt(sort: Desc)], map: "idx_images_uploaded_at")
   @@map("images")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  images    Image[]
+  groups    UserGroup[]
+  messages  Message[]
+  consumptions Consumption[]
+
+  @@map("users")
+}
+
+model Group {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  members   UserGroup[]
+  messages  Message[]
+  consumptions Consumption[]
+
+  @@map("groups")
+}
+
+model UserGroup {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  groupId   String   @map("group_id")
+  role      String   @default("member")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  user      User     @relation(fields: [userId], references: [id])
+  group     Group    @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+  @@map("user_groups")
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  content       String   @db.Text
+  userId        String   @map("user_id")
+  groupId       String   @map("group_id")
+  consumptionId String?  @map("consumption_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user        User         @relation(fields: [userId], references: [id])
+  group       Group        @relation(fields: [groupId], references: [id])
+  consumption Consumption? @relation(fields: [consumptionId], references: [id])
+
+  @@map("messages")
+}
+
+model Consumption {
+  id          String   @id @default(uuid())
+  amount      Decimal  @db.Decimal(10, 2)
+  description String   @db.Text
+  date        DateTime @default(now())
+  userId      String   @map("user_id")
+  groupId     String?  @map("group_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id])
+  group    Group?    @relation(fields: [groupId], references: [id])
+  messages Message[]
+
+  @@map("consumptions")
 }

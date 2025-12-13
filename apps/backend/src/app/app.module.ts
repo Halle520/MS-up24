@@ -1,24 +1,40 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PagesModule } from '../modules/pages/pages.module';
-import { ComponentsModule } from '../modules/components/components.module';
+
+
 import { ImagesModule } from '../modules/images/images.module';
 import { SharedModule } from '../shared/shared.module';
+import { AuthModule } from '../modules/auth/auth.module';
+import { UsersModule } from '../modules/users/users.module';
+import { GroupsModule } from '../modules/groups/groups.module';
+import { ConsumptionModule } from '../modules/consumption/consumption.module';
+
+
+// ... imports
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', 'apps/backend/.env'],
     }),
     SharedModule,
-    PagesModule,
-    ComponentsModule,
     ImagesModule,
+    AuthModule,
+    UsersModule,
+    GroupsModule,
+    ConsumptionModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply((req: any, res: any, next: () => void) => {
+        console.log(`[Request] ${req.method} ${req.url}`);
+        next();
+      })
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

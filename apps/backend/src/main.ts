@@ -13,10 +13,22 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+
+  const jwtSecret = process.env.SUPABASE_JWT_SECRET;
+  Logger.log(`Supabase JWT Secret check: ${jwtSecret ? 'Present' : 'MISSING'} (${jwtSecret?.substring(0, 5)}...)`);
+
+  // Allow all localhost origins in development
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: true, // Allow all origins in development
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'Accept', 'Origin', 'X-Requested-With', 'X-CSRF-Token'],
+    exposedHeaders: ['Content-Length', 'Content-Type'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
+
+  Logger.log('✅ CORS enabled for all origins (development mode)');
 
   // Swagger/OpenAPI Configuration
   const config = new DocumentBuilder()

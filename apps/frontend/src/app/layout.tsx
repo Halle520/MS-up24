@@ -1,6 +1,7 @@
 import './global.css';
 import { Locator } from '../components/locator';
 import { AppQueryClientProvider } from '../lib/providers/query-client-provider';
+import { Header } from '../components/layout/header';
 
 export const metadata = {
   title: 'Welcome to frontend',
@@ -14,9 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col h-[100dvh] overflow-hidden bg-neutral-950 text-warm-50">
         <AppQueryClientProvider>
-          {children}
+          <Header />
+          <main className="flex-1 flex flex-col min-h-0 relative">
+            {children}
+          </main>
           <Locator />
         </AppQueryClientProvider>
       </body>

@@ -83,7 +83,7 @@ export default function ShowPage() {
   };
 
   return (
-    <MainLayout onUploadSuccess={handleUploadSuccess}>
+    <div className="min-h-screen bg-warm-50 px-4 py-10">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-semibold text-neutral-900 mb-2">
           Stay Inspired
@@ -188,6 +188,6 @@ export default function ShowPage() {
           </div>
         </div>
       )}
-    </MainLayout>
+    </div>
   );
 }

@@ -40,8 +40,7 @@ export class PrismaService
       connectionTimeoutMillis: 10000, // 10 seconds
       idleTimeoutMillis: 30000, // 30 seconds
       max: 10, // Maximum number of clients in the pool
-      // For Supabase connection pooling, add these options:
-      // ssl: { rejectUnauthorized: false }, // Uncomment if SSL issues occur
+      ssl: { rejectUnauthorized: false },
     });
 
     // Create Prisma adapter
@@ -90,4 +89,3 @@ export class PrismaService
     }
   }
 }
-

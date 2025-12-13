@@ -68,24 +68,48 @@ apps/backend/src/
 │   └── constants/          # Shared constants
 │       └── app.constants.ts
 └── modules/                # Feature modules
-    ├── pages/              # Page management module
+    ├── users/              # User management module
     │   ├── models/         # DTOs and types
-    │   │   ├── create-page.dto.ts
-    │   │   ├── update-page.dto.ts
-    │   │   └── page-response.type.ts
+    │   │   ├── create-user.dto.ts
+    │   │   ├── update-user.dto.ts
+    │   │   └── user-response.type.ts
     │   ├── entities/       # MikroORM entities
-    │   │   └── page.entity.ts
+    │   │   └── user.entity.ts
     │   ├── services/       # Business logic
-    │   │   └── pages.service.ts
+    │   │   └── users.service.ts
     │   ├── controllers/    # API endpoints
-    │   │   └── pages.controller.ts
-    │   └── pages.module.ts # Module definition
-    ├── components/         # Component management module
-    │   ├── models/         # Component DTOs
-    │   ├── entities/       # Component entity
-    │   ├── services/       # Component service
-    │   ├── controllers/    # Components API
-    │   └── components.module.ts
+    │   │   └── users.controller.ts
+    │   └── users.module.ts # Module definition
+    ├── groups/             # Group management module
+    │   ├── models/         # Group DTOs
+    │   ├── entities/       # Group entity
+    │   ├── services/       # Group service
+    │   ├── controllers/    # Groups API
+    │   └── groups.module.ts # Module definition
+    ├── chats/              # Chat management module
+    │   ├── models/         # Chat DTOs
+    │   ├── entities/       # Chat entity
+    │   ├── services/       # Chat service
+    │   ├── controllers/    # Chats API
+    │   └── chats.module.ts # Module definition
+    ├── dashboards/         # Dashboard management module
+    │   ├── models/         # Dashboard DTOs
+    │   ├── entities/       # Dashboard entity
+    │   ├── services/       # Dashboard service
+    │   ├── controllers/    # Dashboards API
+    │   └── dashboards.module.ts # Module definition
+    ├── consumptions/       # Consumption management module
+    │   ├── models/         # Consumption DTOs
+    │   ├── entities/       # Consumption entity
+    │   ├── services/       # Consumption service
+    │   ├── controllers/    # Consumptions API
+    │   └── consumptions.module.ts # Module definition
+    ├── consumption-items/  # Consumption item management module
+    │   ├── models/         # Consumption item DTOs
+    │   ├── entities/       # Consumption item entity
+    │   ├── services/       # Consumption item service
+    │   ├── controllers/    # Consumption items API
+    │   └── consumption-items.module.ts # Module definition
     ├── images/             # Image upload module
     │   ├── models/         # Image DTOs
     │   ├── entities/       # Image entity

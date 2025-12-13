@@ -19,11 +19,26 @@ const apiClient: AxiosInstance = axios.create({
   timeout: 30000,
 });
 
+import { getSupabaseClient } from '../supabase/supabase-client';
+
 /**
  * Request interceptor
  */
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    try {
+      const supabase = getSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session?.access_token) {
+        console.log('API Client: Attaching token', data.session.access_token.substring(0, 10) + '...');
+        config.headers.Authorization = `Bearer ${data.session.access_token}`;
+      } else {
+        console.warn('API Client: No token found in session');
+      }
+    } catch (e) {
+      console.warn('Failed to attach auth token', e);
+    }
     return config;
   },
   (error) => {

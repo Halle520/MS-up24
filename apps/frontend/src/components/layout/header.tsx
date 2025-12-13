@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { ROUTES } from '../../lib/routes';
 import { UploadModal } from '../upload-modal';
+import { useAuth } from '../../lib/hooks/use-auth';
+import { useHeaderStore } from '../../lib/stores/header-store';
 
 interface HeaderProps {
   onUploadSuccess?: () => void;
@@ -13,6 +15,19 @@ interface HeaderProps {
 export function Header({ onUploadSuccess }: HeaderProps) {
   const router = useRouter();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const { user, signOut } = useAuth();
+  const { config } = useHeaderStore();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push(ROUTES.HOME);
+    router.refresh();
+  };
 
   const handleUploadSuccess = () => {
     setIsUploadModalOpen(false);
@@ -24,23 +39,35 @@ export function Header({ onUploadSuccess }: HeaderProps) {
       <div className="max-w-[1400px] mx-auto px-4 flex items-center gap-6">
         <div
           className="text-2xl font-bold text-primary-600 cursor-pointer hover:text-primary-700 transition-colors"
-          onClick={() => router.push(ROUTES.SHOW)}
+          onClick={() => router.push(ROUTES.HOME)}
         >
-          Monospace
+          {config.title || 'Monospace'}
         </div>
         <nav className="flex gap-2 items-center">
-          <button
-            className="px-4 py-3.5 border-none bg-transparent text-base font-semibold text-neutral-900 cursor-pointer rounded-3xl hover:bg-warm-100 transition-colors"
-            onClick={() => router.push(ROUTES.HOME)}
-          >
-            Home
-          </button>
-          <button className="px-4 py-3.5 border-none text-base font-semibold cursor-pointer rounded-3xl transition-colors bg-neutral-900 text-warm-50 hover:bg-neutral-950">
-            Today
-          </button>
-          <button className="px-4 py-3.5 border-none bg-transparent text-base font-semibold text-neutral-900 cursor-pointer rounded-3xl hover:bg-warm-100 transition-colors">
-            Create
-          </button>
+          {isMounted && user ? (
+            <>
+              {config.customButtons}
+              <button
+                className="px-4 py-3.5 border-none text-base font-semibold cursor-pointer rounded-3xl transition-colors bg-transparent text-neutral-900 hover:bg-warm-200"
+                onClick={() => router.push(ROUTES.GROUPS)}
+              >
+                Groups
+              </button>
+              <button
+                className="px-4 py-3.5 border-none text-base font-semibold cursor-pointer rounded-3xl transition-colors bg-transparent text-neutral-900 hover:bg-warm-200"
+                onClick={handleSignOut}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <button
+              className="px-4 py-3.5 border-none text-base font-semibold cursor-pointer rounded-3xl transition-colors bg-transparent text-neutral-900 hover:bg-warm-200"
+              onClick={() => router.push(ROUTES.LOGIN)}
+            >
+              Login
+            </button>
+          )}
         </nav>
         <div className="flex-1 max-w-[400px] flex items-center gap-3 bg-warm-200 rounded-3xl px-4 py-3.5 h-12">
           <Search size={16} className="text-neutral-500" />
