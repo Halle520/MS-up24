@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import NextImage from 'next/image';
-import {
-  useImages,
-  useUploadImage,
-  useDeleteImage,
-} from '../../lib/hooks/use-images';
-import styles from './pinterest.module.css';
+import { ImageOff, Maximize2, X } from 'lucide-react';
+import { useImages } from '../../lib/hooks/use-images';
+import { truncateFileName } from '../../utils/string.utils';
+import { ROUTES } from '../../lib/routes';
+import { MainLayout } from '../../components/layout/main-layout';
 
 interface ImageCard {
   id: string;
@@ -19,30 +18,21 @@ interface ImageCard {
   size: number;
 }
 
-export default function PinterestPage() {
+export default function ShowPage() {
   const router = useRouter();
-  const { data: imagesData, isLoading } = useImages(1, 20);
-  const uploadMutation = useUploadImage();
-  const deleteMutation = useDeleteImage();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const {
+    data: imagesData,
+    isLoading,
+    refetch,
+  } = useImages(1, 20, undefined, 'medium');
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-
+  const [selectedImage, setSelectedImage] = useState<ImageCard | null>(null);
 
   const images: ImageCard[] =
     imagesData?.images.map((img) => {
-      const imageUrl =
-        img.urlOriginal ||
-        img.urlLarge ||
-        img.urlMedium ||
-        img.urlTiny ||
-        img.url ||
-        '';
-
       return {
         id: img.id,
-        imageUrl,
+        imageUrl: img.url,
         title: img.originalName.split('.')[0] || 'Untitled',
         description: `${(img.size / 1024).toFixed(2)} KB`,
         originalName: img.originalName,
@@ -50,184 +40,154 @@ export default function PinterestPage() {
       };
     }) || [];
 
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError('File size must be less than 10MB');
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-      setUploadError(null);
-      await uploadMutation.mutateAsync({ file });
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      setUploadError(
-        error instanceof Error ? error.message : 'Failed to upload image'
-      );
-    } finally {
-      setIsUploading(false);
-    }
+  const handleImageClick = (image: ImageCard) => {
+    router.push(ROUTES.MEDIA_DETAIL(image.id));
   };
 
-  const handleImageClick = (image: ImageCard) => {
-    router.push(`/pinterest/${image.id}`);
+  const handlePreviewClick = (e: React.MouseEvent, image: ImageCard) => {
+    e.stopPropagation();
+    setSelectedImage(image);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, image: ImageCard) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedImage(image);
+    }
   };
 
   const handleImageError = (imageId: string) => {
     setImageErrors((prev) => new Set(prev).add(imageId));
   };
 
+  const closePreview = () => {
+    setSelectedImage(null);
+  };
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedImage) {
+        closePreview();
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [selectedImage]);
+
+  const handleUploadSuccess = () => {
+    refetch();
+  };
+
   return (
-    <div className={styles.pinterestContainer}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <div
-            className={styles.logo}
-            onClick={() => router.push('/pinterest')}
-          >
-            Monospace
-          </div>
-          <nav className={styles.nav}>
-            <button className={styles.navButton}>Home</button>
-            <button className={`${styles.navButton} ${styles.active}`}>
-              Today
-            </button>
-            <button className={styles.navButton}>Create</button>
-          </nav>
-          <div className={styles.searchBar}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M7.33333 12.6667C10.2789 12.6667 12.6667 10.2789 12.6667 7.33333C12.6667 4.38781 10.2789 2 7.33333 2C4.38781 2 2 4.38781 2 7.33333C2 10.2789 4.38781 12.6667 7.33333 12.6667Z"
-                stroke="#5F5F5F"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14 14L11.1 11.1"
-                stroke="#5F5F5F"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search"
-              className={styles.searchInput}
-            />
-          </div>
-          <div className={styles.headerActions}>
-            <button
-              className={styles.uploadButton}
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-            >
-              {isUploading ? 'Uploading...' : 'Upload Image'}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-          </div>
+    <MainLayout onUploadSuccess={handleUploadSuccess}>
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-semibold text-neutral-900 mb-2">
+          Stay Inspired
+        </h1>
+        <p className="text-xl font-semibold text-neutral-800">
+          {new Date().toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-16 text-neutral-600 text-lg">
+          Loading images...
         </div>
-      </header>
-
-      <main className={styles.main}>
-        <div className={styles.dateHeader}>
-          <h1 className={styles.title}>Stay Inspired</h1>
-          <p className={styles.date}>
-            {new Date().toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
+      ) : images.length === 0 ? (
+        <div className="text-center py-16 text-neutral-600 text-lg">
+          <p>No images found. Upload your first image to get started!</p>
         </div>
-
-        {uploadError && (
-          <div className={styles.errorMessage}>{uploadError}</div>
-        )}
-
-        {isLoading ? (
-          <div className={styles.loading}>Loading images...</div>
-        ) : images.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No images found. Upload your first image to get started!</p>
-          </div>
-        ) : (
-          <div className={styles.masonryGrid}>
-            {images.map((image) => (
-              <div
-                key={image.id}
-                className={styles.imageCard}
-                onClick={() => handleImageClick(image)}
-              >
-                <div className={styles.imageWrapper}>
-                  {imageErrors.has(image.id) || !image.imageUrl ? (
-                    <div className={styles.imagePlaceholder}>
-                      <svg
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z"
-                          fill="#999"
-                        />
-                      </svg>
-                      <p>Image unavailable</p>
-                    </div>
-                  ) : (
+      ) : (
+        <div className="columns-2 md:columns-5 gap-4 w-full">
+          {images.map((image) => (
+            <div
+              key={image.id}
+              className="group break-inside-avoid mb-4 cursor-pointer relative block outline-none"
+              onClick={() => handleImageClick(image)}
+              tabIndex={0}
+              onKeyDown={(e) => handleKeyDown(e, image)}
+              role="button"
+              aria-label={`View ${image.title}`}
+            >
+              <div className="relative overflow-hidden bg-warm-100 rounded-md transition-shadow duration-[400ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:shadow-lg group-focus:ring-4 group-focus:ring-primary-500/50 group-focus:z-10">
+                {imageErrors.has(image.id) || !image.imageUrl ? (
+                  <div className="w-full min-h-[300px] flex flex-col items-center justify-center bg-warm-100 text-neutral-500 gap-3">
+                    <ImageOff size={48} className="text-neutral-500" />
+                    <p className="m-0 text-sm font-medium">Image unavailable</p>
+                  </div>
+                ) : (
+                  <>
                     <NextImage
                       src={image.imageUrl}
                       alt={image.title}
-                      className={styles.image}
+                      className="w-full h-auto block object-cover rounded-md transition-transform duration-[400ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-110"
                       width={0}
                       height={0}
-                      sizes="100vw"
                       style={{ width: '100%', height: 'auto' }}
                       onError={() => handleImageError(image.id)}
                     />
-                  )}
-                  <div className={styles.imageOverlay}>
-                    <div className={styles.imageInfo}>
-                      <h3 className={styles.imageTitle}>{image.title}</h3>
-                      <p className={styles.imageDescription}>
-                        {image.description}
-                      </p>
-                    </div>
+                    <button
+                      className="absolute top-3 right-3 w-9 h-9 rounded-full bg-warm-50/80 backdrop-blur-sm border-neutral-200/50 flex items-center justify-center cursor-pointer opacity-0 scale-[0.8] transition-all duration-200 z-10 shadow-sm text-neutral-900 group-hover:opacity-100 group-hover:scale-100 group-focus:opacity-100 group-focus:scale-100 hover:bg-warm-50 hover:scale-110 hover:shadow-md"
+                      onClick={(e) => handlePreviewClick(e, image)}
+                      aria-label="Preview image"
+                      title="Preview"
+                      tabIndex={0}
+                    >
+                      <Maximize2 size={20} />
+                    </button>
+                  </>
+                )}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-neutral-900/60 p-5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <div className="text-warm-50">
+                    <h3 className="text-base font-normal m-0 mb-2 text-center">
+                      {truncateFileName(image.title)}
+                    </h3>
+                    <p className="text-[28px] font-semibold m-0 text-center leading-[1.2]">
+                      {image.description}
+                    </p>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Picture in Picture Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-neutral-950/95 flex items-center justify-center z-[2000] backdrop-blur-sm animate-fadeIn cursor-zoom-out"
+          onClick={closePreview}
+        >
+          <div
+            className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center animate-zoomIn cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute -top-10 right-0 text-warm-50 bg-warm-50/10 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-warm-50/20 hover:rotate-90 border-none"
+              onClick={closePreview}
+            >
+              <X size={24} />
+            </button>
+            <img
+              src={selectedImage.imageUrl}
+              alt={selectedImage.title}
+              className="max-w-full max-h-[85vh] object-contain rounded shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            />
+            <div className="mt-4 text-warm-50/90 text-base font-medium drop-shadow-md">
+              {selectedImage.title}
+            </div>
           </div>
-        )}
-      </main>
-    </div>
+        </div>
+      )}
+    </MainLayout>
   );
 }

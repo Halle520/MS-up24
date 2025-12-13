@@ -61,8 +61,8 @@ Frontend will run on: `http://localhost:3000` (Next.js default port, or check te
 ### Frontend Routes
 
 - `/` - Home page with API data overview
-- `/pinterest` - Pinterest-style image gallery (list view)
-- `/pinterest/[id]` - Image detail/show page with resize and edit functionality
+- `/show` - Show page (list view)
+- `/show/[id]` - Image detail/show page with resize and edit functionality
 
 **Note:** Both backend and frontend may try to use port 4000. If there's a conflict:
 
@@ -91,8 +91,8 @@ monospace/
 │           └── app/
 │               ├── page.tsx              # Home page
 │               ├── layout.tsx            # Root layout
-│               └── pinterest/            # Pinterest-style gallery
-│                   ├── page.tsx          # Gallery list page
+│               └── show/            # Show page
+│                   ├── page.tsx          # Show list page
 │                   └── [id]/             # Dynamic route
 │                       └── page.tsx      # Image detail/show page
 ├── docs/                 # Project documentation

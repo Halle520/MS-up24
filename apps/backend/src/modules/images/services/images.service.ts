@@ -179,7 +179,8 @@ export class ImagesService {
   async findAll(
     page = 1,
     limit = 10,
-    userId?: string
+    userId?: string,
+    imageType?: 'original' | 'large' | 'medium' | 'tiny'
   ): Promise<ImageListResponse> {
     try {
       const offset = (page - 1) * limit;
@@ -197,7 +198,9 @@ export class ImagesService {
       ]);
 
       return {
-        images: images.map((image) => this.mapPrismaToResponse(image)),
+        images: images.map((image) =>
+          this.mapPrismaToResponse(image, imageType)
+        ),
         total,
         page,
         limit,
@@ -312,28 +315,51 @@ export class ImagesService {
   /**
    * Map Prisma model to response DTO
    */
-  private mapPrismaToResponse(image: {
-    id: string;
-    filename: string;
-    originalName: string;
-    mimeType: string;
-    size: bigint;
-    width: number | null;
-    height: number | null;
-    urlTiny: string | null;
-    urlMedium: string | null;
-    urlLarge: string | null;
-    urlOriginal: string;
-    userId: string | null;
-    uploadedAt: Date;
-  }): ImageResponse {
+  private mapPrismaToResponse(
+    image: {
+      id: string;
+      filename: string;
+      originalName: string;
+      mimeType: string;
+      size: bigint;
+      width: number | null;
+      height: number | null;
+      urlTiny: string | null;
+      urlMedium: string | null;
+      urlLarge: string | null;
+      urlOriginal: string;
+      userId: string | null;
+      uploadedAt: Date;
+    },
+    imageType?: 'original' | 'large' | 'medium' | 'tiny'
+  ): ImageResponse {
+    let url = image.urlOriginal;
+
+    if (imageType) {
+      switch (imageType) {
+        case 'tiny':
+          url = image.urlTiny || image.urlOriginal;
+          break;
+        case 'medium':
+          url = image.urlMedium || image.urlOriginal;
+          break;
+        case 'large':
+          url = image.urlLarge || image.urlOriginal;
+          break;
+        case 'original':
+        default:
+          url = image.urlOriginal;
+          break;
+      }
+    }
+
     return {
       id: image.id,
       filename: image.filename,
       originalName: image.originalName,
       mimeType: image.mimeType,
       size: Number(image.size),
-      url: image.urlOriginal, // Default URL for backward compatibility
+      url: url,
       urlTiny: image.urlTiny || undefined,
       urlMedium: image.urlMedium || undefined,
       urlLarge: image.urlLarge || undefined,
@@ -349,6 +375,147 @@ export class ImagesService {
   private getFileExtension(filename: string): string {
     const lastDot = filename.lastIndexOf('.');
     return lastDot !== -1 ? filename.substring(lastDot) : '';
+  }
+
+  /**
+   * Upload an image from a URL
+   */
+  async uploadFromUrl(
+    imageUrl: string,
+    userId?: string
+  ): Promise<ImageResponse> {
+    try {
+      // Fetch image from URL
+      const response = await fetch(imageUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      });
+
+      if (!response.ok) {
+        throw new BadRequestException(
+          `Failed to fetch image from URL: ${response.statusText}`
+        );
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.startsWith('image/')) {
+        throw new BadRequestException(
+          'URL does not point to a valid image file'
+        );
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (buffer.length > maxSize) {
+        throw new BadRequestException(
+          'Image size exceeds maximum limit of 10MB'
+        );
+      }
+
+      // Extract filename from URL or generate one
+      const urlPath = new URL(imageUrl).pathname;
+      const urlFilename = urlPath.split('/').pop() || `image-${Date.now()}.jpg`;
+      const fileExtension = this.getFileExtension(urlFilename);
+
+      // Create a mock file object for processing
+      const mockFile: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: urlFilename,
+        encoding: '7bit',
+        mimetype: contentType,
+        size: buffer.length,
+        buffer: buffer,
+        destination: '',
+        filename: urlFilename,
+        path: '',
+        stream: null as any,
+      };
+
+      // Validate the fetched image
+      this.validateImageFile(mockFile);
+
+      // Generate unique filename
+      const fileId = randomUUID();
+      const baseFilename = `${fileId}${fileExtension}`;
+
+      // Process original image to get dimensions
+      const originalImage = sharp(buffer);
+      const metadata = await originalImage.metadata();
+      const width = metadata.width;
+      const height = metadata.height;
+
+      // Create multiple resolutions
+      const resolutions = await this.createResolutions(
+        buffer,
+        baseFilename,
+        contentType
+      );
+
+      // Upload all versions to Supabase Storage
+      const uploadPromises = [
+        this.supabaseService.uploadFile(
+          `original/${baseFilename}`,
+          buffer,
+          contentType
+        ),
+        ...Object.entries(resolutions).map(([size, resBuffer]) =>
+          this.supabaseService.uploadFile(
+            `${size}/${baseFilename}`,
+            resBuffer,
+            contentType
+          )
+        ),
+      ];
+
+      await Promise.all(uploadPromises);
+
+      // Get public URLs
+      const urlOriginal = this.supabaseService.getPublicUrl(
+        `original/${baseFilename}`
+      );
+      const urlTiny = this.supabaseService.getPublicUrl(`tiny/${baseFilename}`);
+      const urlMedium = this.supabaseService.getPublicUrl(
+        `medium/${baseFilename}`
+      );
+      const urlLarge = this.supabaseService.getPublicUrl(
+        `large/${baseFilename}`
+      );
+
+      // Save metadata to database using Prisma
+      const image = await this.prisma.image.create({
+        data: {
+          filename: baseFilename,
+          originalName: urlFilename,
+          mimeType: contentType,
+          size: BigInt(buffer.length),
+          width: width,
+          height: height,
+          urlTiny: urlTiny,
+          urlMedium: urlMedium,
+          urlLarge: urlLarge,
+          urlOriginal: urlOriginal,
+          userId: userId,
+        },
+      });
+
+      this.logger.log(`Image uploaded from URL successfully: ${image.id}`);
+
+      return this.mapPrismaToResponse(image);
+    } catch (error) {
+      this.logger.error('Failed to upload image from URL:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to upload image from URL: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
   }
 
   /**

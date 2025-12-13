@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Body,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,6 +29,7 @@ import {
   ImageResponse,
   ImageListResponse,
 } from '../models/image-response.type';
+import { UploadFromUrlDto } from '../models/upload-from-url.dto';
 import { memoryStorage } from 'multer';
 
 /**
@@ -85,6 +87,29 @@ export class ImagesController {
   }
 
   /**
+   * Upload an image from a URL
+   * POST /api/images/upload-from-url
+   */
+  @Post('upload-from-url')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Upload an image from a URL' })
+  @ApiBody({ type: UploadFromUrlDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Image uploaded successfully from URL',
+    type: ImageResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid URL or image',
+  })
+  async uploadFromUrl(
+    @Body() uploadFromUrlDto: UploadFromUrlDto
+  ): Promise<ImageResponse> {
+    return this.imagesService.uploadFromUrl(uploadFromUrlDto.url);
+  }
+
+  /**
    * Get all images with pagination
    * GET /api/images?page=1&limit=10
    */
@@ -92,6 +117,12 @@ export class ImagesController {
   @ApiOperation({ summary: 'Get all images with pagination' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['original', 'large', 'medium', 'tiny'],
+    description: 'Preferred image resolution for the main url field',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of images retrieved successfully',
@@ -99,11 +130,12 @@ export class ImagesController {
   })
   async findAll(
     @Query('page') page?: string,
-    @Query('limit') limit?: string
+    @Query('limit') limit?: string,
+    @Query('type') type?: 'original' | 'large' | 'medium' | 'tiny'
   ): Promise<ImageListResponse> {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
-    return this.imagesService.findAll(pageNum, limitNum);
+    return this.imagesService.findAll(pageNum, limitNum, undefined, type);
   }
 
   /**

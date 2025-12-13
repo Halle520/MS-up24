@@ -7,6 +7,7 @@ import {
   getImages,
   getImageById,
   uploadImage,
+  uploadImageFromUrl,
   deleteImage,
   type Image,
   type ImageListResponse,
@@ -27,10 +28,15 @@ export const imageKeys = {
 /**
  * Get all images with pagination
  */
-export function useImages(page = 1, limit = 10, userId?: string) {
+export function useImages(
+  page = 1,
+  limit = 10,
+  userId?: string,
+  imageType?: 'original' | 'large' | 'medium' | 'tiny'
+) {
   return useQuery({
-    queryKey: imageKeys.list(page, limit),
-    queryFn: () => getImages(page, limit),
+    queryKey: [...imageKeys.list(page, limit), imageType],
+    queryFn: () => getImages(page, limit, imageType),
   });
 }
 
@@ -54,6 +60,20 @@ export function useUploadImage() {
   return useMutation({
     mutationFn: ({ file }: { file: File; userId?: string }) =>
       uploadImage(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Upload an image from a URL
+ */
+export function useUploadImageFromUrl() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ url }: { url: string }) => uploadImageFromUrl(url),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: imageKeys.lists() });
     },

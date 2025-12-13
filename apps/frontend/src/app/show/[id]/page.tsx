@@ -8,9 +8,10 @@ import {
   useUploadImage,
   useDeleteImage,
 } from '../../../lib/hooks/use-images';
-import styles from '../pinterest.module.css';
+import { ROUTES } from '../../../lib/routes';
+import styles from '../show.module.css';
 
-export default function PinterestShowPage() {
+export default function ShowPage() {
   const router = useRouter();
   const params = useParams();
   const imageId = params?.id as string;
@@ -48,7 +49,7 @@ export default function PinterestShowPage() {
           <p>Image not found</p>
           <button
             className={styles.primaryButton}
-            onClick={() => router.push('/pinterest')}
+            onClick={() => router.push(ROUTES.SHOW)}
             style={{ marginTop: '16px' }}
           >
             Back to Gallery
@@ -118,7 +119,7 @@ export default function PinterestShowPage() {
                   try {
                     await uploadMutation.mutateAsync({ file });
                     await deleteMutation.mutateAsync(imageData.id);
-                    router.push('/pinterest');
+                    router.push(ROUTES.SHOW);
                     resolve();
                   } catch (error) {
                     reject(error);
@@ -153,7 +154,7 @@ export default function PinterestShowPage() {
     if (confirm('Are you sure you want to delete this image?')) {
       try {
         await deleteMutation.mutateAsync(imageData.id);
-        router.push('/pinterest');
+        router.push(ROUTES.SHOW);
       } catch (error) {
         alert('Failed to delete image');
       }
@@ -166,14 +167,14 @@ export default function PinterestShowPage() {
         <div className={styles.headerContent}>
           <div
             className={styles.logo}
-            onClick={() => router.push('/pinterest')}
+            onClick={() => router.push(ROUTES.SHOW)}
           >
             Monospace
           </div>
           <nav className={styles.nav}>
             <button
               className={styles.navButton}
-              onClick={() => router.push('/pinterest')}
+              onClick={() => router.push(ROUTES.SHOW)}
             >
               Home
             </button>
@@ -212,7 +213,7 @@ export default function PinterestShowPage() {
           <div className={styles.headerActions}>
             <button
               className={styles.secondaryButton}
-              onClick={() => router.push('/pinterest')}
+              onClick={() => router.push(ROUTES.SHOW)}
             >
               Back to Gallery
             </button>
@@ -319,7 +320,7 @@ export default function PinterestShowPage() {
               </button>
               <button
                 className={styles.secondaryButton}
-                onClick={() => router.push('/pinterest')}
+                onClick={() => router.push(ROUTES.SHOW)}
                 disabled={isResizing}
               >
                 Back to Gallery

@@ -3,7 +3,7 @@
  * Handles image operations via the NestJS backend API
  */
 
-import { apiGet, apiDelete, apiUpload } from './api-client';
+import { apiGet, apiDelete, apiUpload, apiPost } from './api-client';
 
 export interface Image {
   id: string;
@@ -32,9 +32,14 @@ export interface ImageListResponse {
  */
 export async function getImages(
   page = 1,
-  limit = 10
+  limit = 10,
+  type?: 'original' | 'large' | 'medium' | 'tiny'
 ): Promise<ImageListResponse> {
-  return apiGet<ImageListResponse>(`/images?page=${page}&limit=${limit}`);
+  let url = `/images?page=${page}&limit=${limit}`;
+  if (type) {
+    url += `&type=${type}`;
+  }
+  return apiGet<ImageListResponse>(url);
 }
 
 /**
@@ -51,6 +56,13 @@ export async function uploadImage(file: File): Promise<Image> {
   const formData = new FormData();
   formData.append('file', file);
   return apiUpload<Image>('/images/upload', formData);
+}
+
+/**
+ * Upload an image from a URL
+ */
+export async function uploadImageFromUrl(url: string): Promise<Image> {
+  return apiPost<Image>('/images/upload-from-url', { url });
 }
 
 /**

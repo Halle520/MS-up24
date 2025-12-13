@@ -6,6 +6,9 @@ import { usePages } from '../lib/hooks/use-pages';
 import { useComponents } from '../lib/hooks/use-components';
 import { useImages } from '../lib/hooks/use-images';
 
+import Link from 'next/link';
+import { ROUTES } from '../lib/routes';
+
 export default function Index() {
   const {
     data: greetingData,
@@ -33,7 +36,7 @@ export default function Index() {
   const error =
     greetingError || pagesError || componentsError || imagesError
       ? (greetingError || pagesError || componentsError || imagesError)?.message ||
-        'An error occurred'
+      'An error occurred'
       : null;
 
   const greeting = greetingData?.message || '';
@@ -51,8 +54,8 @@ export default function Index() {
               Welcome to Monospace Frontend 👋
             </h1>
             <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-              <a
-                href="/pinterest"
+              <Link
+                href={ROUTES.SHOW}
                 style={{
                   display: 'inline-block',
                   padding: '12px 24px',
@@ -64,7 +67,7 @@ export default function Index() {
                 }}
               >
                 View Pinterest Style Gallery →
-              </a>
+              </Link>
             </div>
           </div>
 
