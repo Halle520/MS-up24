@@ -22,7 +22,7 @@ export default function Index() {
         <div className="pt-8">
           <Link
             href={ROUTES.SHOW}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-full font-semibold text-lg hover:bg-primary-700 transition-all shadow-lg shadow-primary-900/20 hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-lg font-semibold text-lg hover:bg-primary-700 transition-all shadow-lg shadow-primary-900/20 hover:scale-105 active:scale-95"
           >
             View Gallery
             <ArrowRight size={20} />

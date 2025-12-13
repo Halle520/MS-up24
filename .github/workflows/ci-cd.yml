@@ -1,0 +1,87 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+jobs:
+  # CI Job: verify code quality
+  verify:
+    name: Verify (Lint, Test, Build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bunx nx run-many --target=lint --all --parallel
+
+      - name: Test
+        run: bunx nx run-many --target=test --all --parallel
+
+      - name: Build
+        run: bunx nx run-many --target=build --all --parallel
+
+  # CD Job: Deploy to Development
+  deploy-dev:
+    name: Deploy to Development
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # Example: Deploy Backend using Docker (or your specific provider command)
+      # - name: Build and Push Docker Image
+      #   run: |
+      #     docker build -f apps/backend/Dockerfile -t my-registry/backend:dev .
+      #     docker push my-registry/backend:dev
+
+      # Example: Deploy via specific provider CLI
+      # - name: Deploy Backend to Railway
+      #   run: railway up --service backend --environment development
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deploy Info
+        run: echo "🚀 Deploying to Development Environment... (Add your specific provider steps here)"
+
+  # CD Job: Deploy to Production
+  deploy-prod:
+    name: Deploy to Production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Deploy Info
+        run: echo "🚀 Deploying to Production Environment... (Add your specific provider steps here)"

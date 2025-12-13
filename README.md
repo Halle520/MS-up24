@@ -2,9 +2,10 @@
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ **Visual Page Builder** - Build individual pages by dragging and dropping components, adding text and icons, and uploading images ✨
+✨ **Collaborative Consumption & Financial Planning Platform** - Track expenses, chat with friends, and plan your financial future together ✨
 
-A modern full-stack monorepo application with NestJS backend and Next.js frontend for creating customizable web pages without coding.
+A modern financial tool that combines the engagement of a social chat app with the analytical power of a personal finance tracker. Built with NestJS and Next.js.
+
 
 ## 🚀 Quick Start
 
@@ -60,9 +61,14 @@ Frontend will run on: `http://localhost:3000` (Next.js default port, or check te
 
 ### Frontend Routes
 
-- `/` - Home page with API data overview
-- `/show` - Show page (list view)
-- `/show/[id]` - Image detail/show page with resize and edit functionality
+### Frontend Routes
+
+ - `/` - Home
+ - `/login` - User Login
+ - `/groups` - Group Management & Chat
+ - `/dashboard` - Financial Reports & Analytics
+ - `/show` - Image Gallery (Legacy/Shared)
+
 
 **Note:** Both backend and frontend may try to use port 4000. If there's a conflict:
 
@@ -200,25 +206,29 @@ The interactive documentation provides:
 
 - `GET /api/greeting` - Returns a greeting message
 
-#### Pages API (`/api/pages`)
+#### Auth API (`/api/auth`)
 
-- `GET /api/pages` - Get all pages (with pagination: `?page=1&limit=10`)
-- `GET /api/pages/:id` - Get a page by ID
-- `GET /api/pages/slug/:slug` - Get a page by slug
-- `POST /api/pages` - Create a new page
-- `PATCH /api/pages/:id` - Update a page
-- `DELETE /api/pages/:id` - Delete a page
-- `POST /api/pages/:id/publish` - Publish a page
-- `POST /api/pages/:id/unpublish` - Unpublish a page
+-   `POST /api/auth/login` - User login
+-   `POST /api/auth/register` - User registration
+-   `GET /api/auth/profile` - Get current user profile
 
-#### Components API (`/api/components`)
+#### Groups API (`/api/groups`)
 
-- `GET /api/components` - Get all components (filter by type: `?type=text`)
-- `GET /api/components/types` - Get available component types
-- `GET /api/components/:id` - Get a component by ID
-- `POST /api/components` - Create a new component
-- `PATCH /api/components/:id` - Update a component
-- `DELETE /api/components/:id` - Delete a component
+-   `GET /api/groups` - Get user's groups
+-   `POST /api/groups` - Create a new group
+-   `GET /api/groups/:id` - Get group details
+-   `POST /api/groups/:id/join` - Join a group
+
+#### Messages API (`/api/messages`)
+
+-   `GET /api/messages` - Get messages for a group
+-   `POST /api/messages` - Send a message (text or consumption)
+
+#### Consumption API (`/api/consumption`)
+
+-   `GET /api/consumption` - Get consumption history
+-   `POST /api/consumption` - Log a new consumption
+-   `GET /api/consumption/statistics` - Get spending reports
 
 #### Images API (`/api/images`)
 
@@ -250,60 +260,53 @@ The frontend is configured to load images from Supabase Storage using Next.js Im
 - Images use the `fill` layout for responsive sizing
 - Error handling displays a placeholder when images fail to load
 - Unoptimized mode is enabled in development for faster loading
-
 **For detailed API documentation with examples, request/response schemas, and interactive testing, visit the [API Documentation](http://localhost:4000/api-docs) page.**
 
 ## 🌐 Environment Variables
 
-Environment files have been created for both projects. Copy the `.env.example` files and update with your actual values:
+The project uses a split environment strategy for Development and Production. We provide template files for each environment.
+Navigate to the apps directory to see:
+- `apps/backend/.env.development`
+- `apps/backend/.env.production`
+- `apps/frontend/.env.development`
+- `apps/frontend/.env.production`
 
-### Backend (`apps/backend/.env`)
+### Setup Instructions
+
+1.  **Backend**:
+    copy the desired environment file to `.env`:
+    ```bash
+    # For Development
+    cp apps/backend/.env.development apps/backend/.env
+    ```
+
+2.  **Frontend**:
+    Next.js automatically loads `.env.development` when running in dev mode (`bun run dev`).
+    To override locally, you can create a `.env.local` file:
+    ```bash
+    cp apps/frontend/.env.development apps/frontend/.env.local
+    ```
+
+### Backend Variables (`apps/backend/.env`)
 
 Essential variables:
 
-- `PORT` - Server port (default: 4000)
-- `FRONTEND_URL` - Frontend URL for CORS (default: http://localhost:3000)
-- `DATABASE_URL` - Supabase database connection string (from Supabase Dashboard > Settings > Database). Used by Prisma to connect to the database.
-- `SUPABASE_URL` - Your Supabase project URL
-- `SUPABASE_ANON_KEY` - Supabase anonymous key (for frontend operations)
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (recommended for backend storage operations, or use ANON_KEY)
-- `AUTH0_DOMAIN` - Your Auth0 domain
-- `AUTH0_CLIENT_ID` - Auth0 client ID
-- `AUTH0_CLIENT_SECRET` - Auth0 client secret
-- `JWT_SECRET` - Secret key for JWT tokens
+-   `PORT` - Server port
+-   `NODE_ENV` - `development` or `production`
+-   `FRONTEND_URL` - Frontend URL for CORS
+-   `DATABASE_URL` - **Specific to Environment**. Connect to your Dev or Prod Supabase instance.
+-   `SUPABASE_URL` - Your Supabase project URL
+-   `SUPABASE_ANON_KEY` & `SUPABASE_SERVICE_ROLE_KEY` - Supabase keys
 
-**Setup:**
+### Frontend Variables (`apps/frontend/.env`)
 
-```bash
-# Copy the example file
-cp apps/backend/.env.example apps/backend/.env
+Essential variables (prefixed with `NEXT_PUBLIC_`):
 
-# Edit with your actual values
-# (The .env file is already created with default development values)
-```
+-   `NEXT_PUBLIC_API_URL` - URL of the Backend API (Dev or Prod)
+-   `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase config
+-   `NEXT_PUBLIC_APP_URL` - The URL of the frontend app
 
-### Frontend (`apps/frontend/.env.local`)
-
-Essential variables (all must be prefixed with `NEXT_PUBLIC_` to be accessible in the browser):
-
-- `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://localhost:4000/api)
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-- `NEXT_PUBLIC_AUTH0_DOMAIN` - Auth0 domain
-- `NEXT_PUBLIC_AUTH0_CLIENT_ID` - Auth0 client ID
-- `NEXT_PUBLIC_APP_URL` - Frontend application URL
-
-**Setup:**
-
-```bash
-# Copy the example file
-cp apps/frontend/.env.example apps/frontend/.env.local
-
-# Edit with your actual values
-# (The .env.local file is already created with default development values)
-```
-
-**Note:** `.env` and `.env.local` files are gitignored and should never be committed to version control.
+**Note:** Git ignores `.env` and `.env.*.local` files. Never commit secrets!
 
 ## 📚 Learn More
 
@@ -539,10 +542,11 @@ The image upload system handles everything directly from the frontend:
 ## 🎯 Next Steps
 
 1. ✅ Set up your database connection (PostgreSQL/Supabase)
-2. Configure Auth0 authentication
-3. Add more API endpoints
-4. Build out your frontend components
-5. Set up environment variables
+2. 📖 Follow the **[Environment Setup Guide](./docs/ENVIRONMENT_SETUP.md)** to configure GitHub and Supabase.
+3. Configure Auth0 authentication
+4. Add more API endpoints
+5. Build out your frontend components
+
 
 ## 🔍 LocatorJS
 

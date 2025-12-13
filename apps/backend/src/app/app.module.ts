@@ -16,7 +16,12 @@ import { ConsumptionModule } from '../modules/consumption/consumption.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env', 'apps/backend/.env'],
+      envFilePath: [
+        `.env.${process.env.NODE_ENV || 'development'}`,
+        '.env',
+        `apps/backend/.env.${process.env.NODE_ENV || 'development'}`,
+        'apps/backend/.env',
+      ],
     }),
     SharedModule,
     ImagesModule,

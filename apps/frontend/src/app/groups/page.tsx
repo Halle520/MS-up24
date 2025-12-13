@@ -44,7 +44,7 @@ export default function GroupsPage() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">My Groups</h1>
+      <h1 className="text-3xl text-secondary-400 font-bold mb-8">My Groups</h1>
 
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Create New Group</h2>

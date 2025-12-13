@@ -207,16 +207,45 @@ modules/{feature-name}/
 # Install dependencies
 bun install
 
-# Copy environment files
-cp apps/backend/.env.example apps/backend/.env
-cp apps/frontend/.env.example apps/frontend/.env.local
+# Configure Environments
+# The project now supports split environments: Development and Production.
+
+# Backend Setup:
+# Copy the appropriate env file:
+cp apps/backend/.env.development apps/backend/.env
+# Or for production:
+# cp apps/backend/.env.production apps/backend/.env
+
+# Frontend Setup:
+# Next.js automatically loads .env during development
+# Create .env.local for local overrides if needed
+cp apps/frontend/.env.development apps/frontend/.env.local
 
 # Update environment variables
-# Edit .env files with actual values
+# Edit the created env files with actual values from your secrets manager
 
-# Start development
+# Start development (uses development configuration)
 bun run start:all
 ```
+
+### Environment Management
+
+We use a split environment strategy:
+
+1. **Development (`dev`)**:
+   - Uses `apps/backend/.env.development`
+   - Uses `apps/frontend/.env.development`
+   - Connects to Development Database (e.g. `monospace_dev`)
+   - Deploys to Development URL
+
+2. **Production (`prod`)**:
+   - Uses `apps/backend/.env.production`
+   - Uses `apps/frontend/.env.production`
+   - Connects to Production Database (e.g. `monospace_prod`)
+   - Deploys to Production URL
+
+**Note**: Never commit `.env` or `.env.*.local` files to git. Always use the template files provided.
+
 
 ## Common Tasks
 
